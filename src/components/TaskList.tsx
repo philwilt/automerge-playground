@@ -1,7 +1,5 @@
 import "@picocss/pico/css/pico.min.css";
 import "../index.css";
-// import { useState } from "react";
-// import { Automerge } from "@automerge/react/slim";
 
 import {
   type AutomergeUrl,
