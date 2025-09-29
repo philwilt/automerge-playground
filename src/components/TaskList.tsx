@@ -1,6 +1,13 @@
 import "@picocss/pico/css/pico.min.css";
 import "../index.css";
-import { useState } from "react";
+// import { useState } from "react";
+// import { Automerge } from "@automerge/react/slim";
+
+import {
+  type AutomergeUrl,
+  useDocument,
+  updateText,
+} from "@automerge/react";
 
 export interface Task {
   title: string;
@@ -8,8 +15,8 @@ export interface Task {
 }
 
 export interface TaskList {
-  title: string;
-  tasks: Task[];
+  tasks: Task[],
+  title: string,
 }
 
 // A helper function to consistently initialize a task list.
@@ -21,53 +28,49 @@ export function initTaskList(): TaskList {
 }
 
 export const TaskList: React.FC<{
-  taskList: TaskList;
-}> = ({ taskList }) => {
-  const [tasks, setTasks] = useState(taskList.tasks);
+  docUrl: AutomergeUrl,
+}> = ({ docUrl }) => {
+
+  const [doc, changeDoc] = useDocument<TaskList>(docUrl, {
+    suspense: true,
+  });
 
   return (
     <>
       <button
         type="button"
         onClick={() => {
-          setTasks([
-            ...tasks,
-            {
-              title: "",
-              done: false,
-            },
-          ]);
+          changeDoc((d) =>
+            d.tasks.unshift({ title: "", done: false })
+          );
         }}
       >
         <b>+</b> New task
       </button>
 
       <div id="task-list">
-        {tasks?.map(({ title, done }, index) => (
+        {doc && doc.tasks?.map(({ title, done }, index) => (
           <div className="task" key={index}>
             <input
               type="checkbox"
               checked={done}
-              onChange={() =>
-                setTasks(
-                  tasks.map((task, i) =>
-                    i === index ? { ...task, done: !task.done } : task,
-                  ),
-                )
-              }
+              onChange={() => {
+                changeDoc((d) => {
+                  console.log(d.tasks[0].title)
+                  d.tasks[index].done = !d.tasks[index].done;
+                })
+              }}
             />
 
             <input
               type="text"
               placeholder="What needs doing?"
               value={title || ""}
-              onChange={(e) =>
-                setTasks(
-                  tasks.map((task, i) =>
-                    i === index ? { ...task, title: e.target.value } : task,
-                  ),
-                )
-              }
+              onChange={(e) => {
+                changeDoc((d) => {
+                  updateText(d, ["tasks", index, "title"], e.target.value)
+                })
+              }}
               style={done ? { textDecoration: "line-through" } : {}}
             />
           </div>
