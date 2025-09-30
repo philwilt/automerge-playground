@@ -3,7 +3,7 @@ import { useDocument, AutomergeUrl } from "@automerge/react";
 import { TaskList } from './TaskList';
 
 export interface DocumentList {
-  taskLists: AutomergeUrl[],
+  tasksLists: AutomergeUrl[],
 }
 
 export const DocumentList: React.FC<{
