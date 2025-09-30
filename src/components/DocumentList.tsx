@@ -1,27 +1,49 @@
-import React from "react";
-import { useDocument, AutomergeUrl } from "@automerge/react";
-import { TaskList } from './TaskList';
+import React, { useEffect } from "react";
+import { useDocument, AutomergeUrl, useRepo } from "@automerge/react";
+import { initTaskList, TaskList } from './TaskList';
 
 export interface DocumentList {
-  tasksLists: AutomergeUrl[],
+  taskLists: AutomergeUrl[],
 }
 
 export const DocumentList: React.FC<{
-  docUrl: AutomergeUrl,
-}> = ({ docUrl }) => {
+  docUrl: AutomergeUrl;
+  selectedDocument: AutomergeUrl | null;
+  onSelectDocument: (docUrl: AutomergeUrl | null) => void;
+}> = ({ docUrl, selectedDocument, onSelectDocument }) => {
+  const repo = useRepo();
   const [doc, changeDoc] = useDocument<DocumentList>(docUrl, {
     suspense: true
   });
 
+  useEffect(() => {
+    changeDoc((d) => {
+      if (selectedDocument && !d.taskLists.includes(selectedDocument)) {
+        d.taskLists.push(selectedDocument)
+      }
+    });
+  }, [selectedDocument, changeDoc])
+
+  const handleNewDocument = () => {
+    const newTaskList = repo.create<TaskList>(initTaskList());
+    changeDoc((d) => d.taskLists.push(newTaskList.url));
+    onSelectDocument(newTaskList.url);
+  }
+
   return (
     <div className="document-list">
       <div className="documents">
-        {doc.tasksLists.map((docUrl) => (
-          <div key={docUrl} className={`document-item`}>
+        {doc.taskLists.map((docUrl) => (
+          <div
+            key={docUrl}
+            className={`document-item ${docUrl == selectedDocument ? "active": ""}`}
+            onClick={() => onSelectDocument(docUrl)}
+          >
             <DocumentTitle docUrl={docUrl} />
           </div>
         ))}
       </div>
+      <button onClick={handleNewDocument}>+ Task List</button>
     </div>
   )
 }

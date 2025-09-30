@@ -1,4 +1,7 @@
-import { type AutomergeUrl, useDocument } from "@automerge/react";
+// import { useState } from "react";
+import { type AutomergeUrl, isValidAutomergeUrl } from "@automerge/react";
+import { useHash } from "react-use";
+
 import { RootDocument } from "../rootDoc";
 import automergeLogo from "/automerge.png";
 import "@picocss/pico/css/pico.min.css";
@@ -6,9 +9,12 @@ import { TaskList } from "./TaskList";
 import { DocumentList } from "./DocumentList";
 
 function App({ docUrl }: { docUrl: AutomergeUrl }) {
-  const [doc] = useDocument<RootDocument>(docUrl, {
-    suspense: true,
-  })
+  const [hash, setHash] = useHash();
+  const cleanHash = hash.slice(1);
+  const selectedDocUrl =
+    cleanHash && isValidAutomergeUrl(cleanHash)
+    ? (cleanHash as AutomergeUrl)
+    : null;
 
   return (
     <>
@@ -21,11 +27,22 @@ function App({ docUrl }: { docUrl: AutomergeUrl }) {
 
       <main>
         <div className="document-list">
-          <DocumentList docUrl={docUrl} />
+          <DocumentList
+            docUrl={docUrl}
+            onSelectDocument={(url) => {
+              if (url) {
+                setHash(url)
+              } else {
+                setHash("");
+              }
+              }
+            }
+            selectedDocument={selectedDocUrl}
+          />
         </div>
 
         <div className="task-list">
-          <TaskList docUrl={doc.tasksLists[0]} />
+          {selectedDocUrl ? <TaskList docUrl={selectedDocUrl} /> : null}
         </div>
       </main>
 
