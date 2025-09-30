@@ -1,9 +1,15 @@
-import { type AutomergeUrl } from "@automerge/react";
+import { type AutomergeUrl, useDocument } from "@automerge/react";
+import { RootDocument } from "../rootDoc";
 import automergeLogo from "/automerge.png";
 import "@picocss/pico/css/pico.min.css";
 import { TaskList } from "./TaskList";
+import { DocumentList } from "./DocumentList";
 
 function App({ docUrl }: { docUrl: AutomergeUrl }) {
+  const [doc] = useDocument<RootDocument>(docUrl, {
+    suspense: true,
+  })
+
   return (
     <>
       <header>
@@ -14,8 +20,12 @@ function App({ docUrl }: { docUrl: AutomergeUrl }) {
       </header>
 
       <main>
+        <div className="document-list">
+          <DocumentList docUrl={docUrl} />
+        </div>
+
         <div className="task-list">
-          <TaskList docUrl={docUrl} />
+          <TaskList docUrl={doc.tasksLists[0]} />
         </div>
       </main>
 

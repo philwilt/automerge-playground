@@ -5,23 +5,29 @@ import "@picocss/pico/css/pico.min.css";
 import "./index.css";
 
 import { initTaskList, TaskList } from "./components/TaskList.tsx";
-import { Repo,
+import {
+  Repo,
   IndexedDBStorageAdapter,
   RepoContext,
   isValidAutomergeUrl,
   DocHandle,
-  BroadcastChannelNetworkAdapter
+  BroadcastChannelNetworkAdapter,
+  // WebSocketClientAdapter,
 } from "@automerge/react";
+import { RootDocument } from "./rootDoc.ts";
 
 const repo = new Repo({
-  network: [new BroadcastChannelNetworkAdapter()],
+  network: [
+    new BroadcastChannelNetworkAdapter(),
+    // new WebSocketClientAdapter("wss://sync.automerge.org"),
+  ],
   storage: new IndexedDBStorageAdapter()
 })
 
 declare global {
   interface Window {
     repo: Repo;
-    handle: DocHandle<TaskList>
+    handle: DocHandle<RootDocument>
   }
  }
 
@@ -30,10 +36,12 @@ window.repo = repo;
 const locationHash = document.location.hash.substring(1);
 
 if (isValidAutomergeUrl(locationHash)) {
-  window.handle = await repo.find(locationHash);
+  const taskList = await repo.find(locationHash);
+  window.handle = repo.create({ tasksLists: [taskList.url] });
 } else {
-  window.handle = repo.create<TaskList>(initTaskList());
-  document.location.hash = window.handle.url;
+  const taskList = repo.create<TaskList>(initTaskList());
+  window.handle = repo.create({ tasksLists: [taskList.url] })
+  document.location.hash = taskList.url;
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
