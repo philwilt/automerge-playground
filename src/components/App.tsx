@@ -2,19 +2,17 @@
 import { type AutomergeUrl, isValidAutomergeUrl } from "@automerge/react";
 import { useHash } from "react-use";
 
-import { RootDocument } from "../rootDoc";
 import automergeLogo from "/automerge.png";
 import "@picocss/pico/css/pico.min.css";
+
 import { TaskList } from "./TaskList";
 import { DocumentList } from "./DocumentList";
+import { SyncControls } from "./SyncControls";
 
 function App({ docUrl }: { docUrl: AutomergeUrl }) {
   const [hash, setHash] = useHash();
   const cleanHash = hash.slice(1);
-  const selectedDocUrl =
-    cleanHash && isValidAutomergeUrl(cleanHash)
-    ? (cleanHash as AutomergeUrl)
-    : null;
+  const selectedDocUrl = cleanHash && isValidAutomergeUrl(cleanHash) ? (cleanHash as AutomergeUrl) : null;
 
   return (
     <>
@@ -47,6 +45,8 @@ function App({ docUrl }: { docUrl: AutomergeUrl }) {
       </main>
 
       <footer>
+        <SyncControls docUrl={docUrl} />
+
         <p className="footer-copy">
           Powered by Automerge + Vite + React + TypeScript
         </p>

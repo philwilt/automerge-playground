@@ -21,7 +21,7 @@ export const DocumentList: React.FC<{
       if (selectedDocument && !d.taskLists.includes(selectedDocument)) {
         d.taskLists.push(selectedDocument)
       }
-    });
+    })
   }, [selectedDocument, changeDoc])
 
   const handleNewDocument = () => {

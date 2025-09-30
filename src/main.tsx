@@ -10,14 +10,14 @@ import {
   RepoContext,
   DocHandle,
   BroadcastChannelNetworkAdapter,
-  // WebSocketClientAdapter,
+  WebSocketClientAdapter,
 } from "@automerge/react";
-import { RootDocument } from "./rootDoc.ts";
+import { getOrCreateRoot, RootDocument } from "./rootDoc.ts";
 
 const repo = new Repo({
   network: [
     new BroadcastChannelNetworkAdapter(),
-    // new WebSocketClientAdapter("wss://sync.automerge.org"), // Broken
+    new WebSocketClientAdapter("wss://sync.automerge.org"), // Doesn't always work
   ],
   storage: new IndexedDBStorageAdapter()
 })
@@ -30,18 +30,10 @@ declare global {
  }
 
 window.repo = repo;
-window.handle = repo.create({ taskLists: []})
 
-// const locationHash = document.location.hash.substring(1);
+const rootDocUrl = getOrCreateRoot(repo);
+window.handle = await repo.find(rootDocUrl);
 
-// if (isValidAutomergeUrl(locationHash)) {
-//   const taskList = await repo.find(locationHash);
-//   window.handle = repo.create({ taskLists: [taskList.url] });
-// } else {
-//   const taskList = repo.create<TaskList>(initTaskList());
-//   window.handle = repo.create({ taskLists: [taskList.url] })
-//   document.location.hash = taskList.url;
-// }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
